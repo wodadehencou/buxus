@@ -6,6 +6,7 @@ module sm2_behavioral;
 	
 	initial begin
 		sm2_test();
+		batch_test();
 		$finish;
 	end
 

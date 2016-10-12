@@ -1,11 +1,11 @@
 
 parameter DWIDTH=256;
-parameter P=DWIDTH'hFFFFFFFE_FFFFFFFF_FFFFFFFF_FFFFFFFF_FFFFFFFF_00000000_FFFFFFFF_FFFFFFFF;
-parameter A=DWIDTH'hFFFFFFFE_FFFFFFFF_FFFFFFFF_FFFFFFFF_FFFFFFFF_00000000_FFFFFFFF_FFFFFFFC;
-parameter B=DWIDTH'h28E9FA9E_9D9F5E34_4D5A9E4B_CF6509A7_F39789F5_15AB8F92_DDBCBD41_4D940E93;
-parameter N=DWIDTH'hFFFFFFFE_FFFFFFFF_FFFFFFFF_FFFFFFFF_7203DF6B_21C6052B_53BBF409_39D54123;
-parameter G_X=DWIDTH'h32C4AE2C_1F198119_5F990446_6A39C994_8FE30BBF_F2660BE1_715A4589_334C74C7;
-parameter G_Y=DWIDTH'hBC3736A2_F4F6779C_59BDCEE3_6B692153_D0A9877C_C62A4740_02DF32E5_2139F0A0;
+parameter [DWIDTH-1 : 0] P=256'hFFFFFFFE_FFFFFFFF_FFFFFFFF_FFFFFFFF_FFFFFFFF_00000000_FFFFFFFF_FFFFFFFF;
+parameter [DWIDTH-1 : 0] A=256'hFFFFFFFE_FFFFFFFF_FFFFFFFF_FFFFFFFF_FFFFFFFF_00000000_FFFFFFFF_FFFFFFFC;
+parameter [DWIDTH-1 : 0] B=256'h28E9FA9E_9D9F5E34_4D5A9E4B_CF6509A7_F39789F5_15AB8F92_DDBCBD41_4D940E93;
+parameter [DWIDTH-1 : 0] N=256'hFFFFFFFE_FFFFFFFF_FFFFFFFF_FFFFFFFF_7203DF6B_21C6052B_53BBF409_39D54123;
+parameter [DWIDTH-1 : 0] G_X=256'h32C4AE2C_1F198119_5F990446_6A39C994_8FE30BBF_F2660BE1_715A4589_334C74C7;
+parameter [DWIDTH-1 : 0] G_Y=256'hBC3736A2_F4F6779C_59BDCEE3_6B692153_D0A9877C_C62A4740_02DF32E5_2139F0A0;
 
 // computer (a+b) mod p
 // 0<a,b<p
@@ -75,7 +75,7 @@ function [DWIDTH-1 : 0] mod_inv (
 	u = a;
 	v = p;
 
-	while (v!=1) begin
+	while ((v!=1) && (u!=1)) begin
 		while (u[0] == 0) begin
 			u = u>>1;
 			if (r[0] == 0) r=r>>1;
@@ -97,7 +97,8 @@ function [DWIDTH-1 : 0] mod_inv (
 			s = mod_sub(s, r, p);
 		end
 	end
-	return s[DWIDTH-1 : 0];
+	if (u==1) return r[DWIDTH-1 : 0];
+	else return s[DWIDTH-1 : 0];
 endfunction
 
 // computer a mod p
@@ -142,7 +143,7 @@ function void Affine_double (
 	r1 = mod_mul(p_x, p_x, P);
 	r2 = mod_add(r1, r1, P);
 	r1 = mod_add(r2, r1, P);
-	r1 = mod_add(r1, a, P);
+	r1 = mod_add(r1, A, P);
 `endif
 
 	//if (r1 == 0) begin
@@ -204,7 +205,7 @@ function void Affine_add (
 
 	r1 = mod_sub(p2_x, p1_x, P);
 	r2 = mod_sub(p2_y, p1_y, P);
-	r2 = mod_inv(r2, P);
+	r1 = mod_inv(r1, P);
 	r1 = mod_mul(r1, r2, P); //lamada
 	r2 = mod_mul(r1, r1, P);
 	r3 = mod_add(p1_x, p2_x, P);
@@ -337,9 +338,9 @@ function int sm2_sign (
 	x1 = mod(kg_x, N);
 	r = mod_add(e, x1, N);
 	if (r==0) return -1;
-	if（mod_add(r, random, N) == 0) return -1;
+	if (mod_add(r, random, N) == 0) return -1;
 
-	tmp1 = mod_mul(r, sk, N)
+	tmp1 = mod_mul(r, sk, N);
 	tmp2 = mod_sub(random, tmp1, N);
 	tmp1 = mod_add(sk, 1, N);
 	tmp1 = mod_inv(tmp1, N);
