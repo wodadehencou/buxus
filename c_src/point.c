@@ -22,6 +22,7 @@ void aff_point_double(AFFPOINT* r, AFFPOINT* p, ECGROUP* group) {
 	BIGINT r1 [BIGINT_LEN];
 	BIGINT r2 [BIGINT_LEN];
 	BIGINT r3 [BIGINT_LEN];
+	BIGINT x3 [BIGINT_LEN];
 	BIGINT con1 [BIGINT_LEN] = {1};
 
 	if (bigint_is_zero(p->x) && (bigint_is_zero(p->y))) {
@@ -41,14 +42,15 @@ void aff_point_double(AFFPOINT* r, AFFPOINT* p, ECGROUP* group) {
 //	bigint_mod_add(r1, r1, group->a, group->p);
 //#endif
 
-	bigint_mod_sqr(r2, p->y, group->p);
+	bigint_mod_lshift(r2, p->y, group->p);
 	bigint_mod_inv(r2, r2, group->p);
 	bigint_mod_mul(r1, r1, r2, group->p); //lamada
 	bigint_mod_sqr(r2, r1, group->p);
 	bigint_mod_lshift(r3, p->x, group->p);
-	bigint_mod_sub(r->x, r2, r3, group->p);
-	bigint_mod_sub(r3, p->x, r->x, group->p);
+	bigint_mod_sub(x3, r2, r3, group->p);
+	bigint_mod_sub(r3, p->x, x3, group->p);
 	bigint_mod_mul(r2, r1, r3, group->p);
+	bigint_copy(r->x, x3);
 	bigint_mod_sub(r->y, r2, p->y, group->p);
 	return;
 }
@@ -87,15 +89,17 @@ void aff_point_add(AFFPOINT* r, AFFPOINT* p, AFFPOINT* q, ECGROUP* group) {
 	bigint_mod_mul(r1, r1, r2, group->p); //lamada
 	bigint_mod_sqr(r2, r1, group->p);
 	bigint_mod_add(r3, p->x, q->x, group->p);
-	bigint_mod_sub(r->x, r2, r3, group->p);
-	bigint_mod_sub(r3, p->x, r->x, group->p);
+	bigint_mod_sub(x3, r2, r3, group->p);
+	bigint_mod_sub(r3, p->x, x3, group->p);
 	bigint_mod_mul(r2, r1, r3, group->p);
+	bigint_copy(r->x, x3);
 	bigint_mod_sub(r->y, r2, p->y, group->p);
 	return;
 }
 
 void aff_point_mul(AFFPOINT* r, AFFPOINT* p, BIGINT* k, ECGROUP* group) {
 	int i=256;
+	BIGINT local_k[BIGINT_LEN];
 
 	if (bigint_is_zero(k) || (bigint_is_zero(p->x) && bigint_is_zero(p->y))) {
 		aff_set_infinity(r);
@@ -103,12 +107,13 @@ void aff_point_mul(AFFPOINT* r, AFFPOINT* p, BIGINT* k, ECGROUP* group) {
 	}
 
 	aff_set_infinity(r);
+	bigint_copy(local_k, k);
 	while(i--) {
 		aff_point_double(r, r, group);
-		if ((k[BIGINT_LEN-1] & MSB_MASK) == MSB_MASK) {
+		if ((local_k[BIGINT_LEN-1] & MSB_MASK) == MSB_MASK) {
 			aff_point_add(r, r, p, group);
 		}
-		bigint_lshift(k, k);
+		bigint_lshift(local_k, local_k);
 	}
 	return;
 }

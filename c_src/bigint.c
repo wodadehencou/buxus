@@ -108,10 +108,16 @@ void bigint_mod (BIGINT* r, BIGINT *p) {
 }
 
 void bigint_sm2_modorder(BIGINT* r, BIGINT* a) {
-	BIGINT order[BIGINT_LEN+1] =
-	{0xFC632551,0xF3B9CAC2,0xA7179E84,0xBCE6FAAD,0xFFFFFFFF,0xFFFFFFFF,0x00000000,0xFFFFFFFF,0};
-	BIGINT mu[BIGINT_LEN+1] =
-	{0xEEDF9BFE,0x012FFD85,0xDF1A6C21,0x43190552,0xFFFFFFFF,0xFFFFFFFE,0xFFFFFFFF,0x00000000,0x1};
+	BIGINT order[BIGINT_LEN+1] = {
+		0x39D54123, 0x53BBF409, 0x21C6052B, 0x7203DF6B,
+		0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFE,
+		0x00000000,
+	};
+	BIGINT mu[BIGINT_LEN+1] = {
+		0xf15149a0, 0x12ac6361, 0xfa323c01, 0x8dfc2096,
+		0x00000001, 0x00000001, 0x00000001, 0x00000001,
+		0x00000001,
+	};
 	// 2^(32*(BIGINT_LEN*2))/order
 
 	BIGINT r0, r1, r2;
@@ -598,7 +604,7 @@ void bigint_mod_inv(BIGINT* r, BIGINT* a, BIGINT* p)
 		return;
 	}
 
-	while (bigint_is_zero(bu)) {
+	while (!bigint_is_zero(bu)) {
 		while (bu[0] & 1 == 0) {
 			bigint_rshift(bu, bu);
 
@@ -690,17 +696,21 @@ int bigint_cmp (BIGINT *a, BIGINT *b) {
 	int i = BIGINT_LEN;
 	BIGINT *ap;
 	BIGINT *bp;
-	ap = a;
-	bp = b;
+	BIGINT ad;
+	BIGINT bd;
+	ap = a+BIGINT_LEN-1;
+	bp = b+BIGINT_LEN-1;
 	while (i--) {
-		if (*ap > *bp) {
+		ad = *ap;
+		bd = *bp;
+		if (ad > bd) {
 			return 1;
 		}
-		else if (*ap < *bp) {
+		else if (ad < bd) {
 			return -1;
 		}
-		ap++;
-		bp++;
+		ap--;
+		bp--;
 	}
 	return 0;
 }
@@ -741,7 +751,12 @@ void char2bigint (BIGINT *r, UINT8* c) {
 
 #ifdef BIT32
 	while (i--) {
-		*(rp++) = ((*(cp--)) & 0xff) | ((*(cp--)<<8) & 0xff00) | ((*(cp--)<<16) & 0xff0000) | ((*(cp--)<<24) & 0xff000000) ;
+		BIGINT t1, t2, t3, t4;
+		t1 = ((*(cp--)) & 0xff);
+		t2 = ((*(cp--)<<8) & 0xff00);
+		t3 = ((*(cp--)<<16) & 0xff0000);
+		t4 = ((*(cp--)<<24) & 0xff000000);
+		*(rp++) = t1 | t2 | t3 | t4;
 	}
 #else
 #endif
