@@ -1,7 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/time.h>
+#include <time.h>
 #include "buxus_type.h"
 #include "point.h"
+#include "bigint.h"
 #include "sm2_algo.h"
 
 int sm2_function_test() {
@@ -78,14 +81,7 @@ int sm2_function_test() {
 	group_set_p(&group, p);
 	group_set_n(&group, n);
 	group_set_g(&group, g);
-#define DEBUG
-#ifdef DEBUG
-	BIGINT k[BIGINT_LEN] = {4};
-	int naf [257];
-	int len;
-	len = bigint_compute_wnaf(naf, k);
 
-#endif
 	sm2_sign(hash, random, sk, sign_r_out, sign_s_out, &group);
 	for (i=0; i<32; i++) {
 		if (sign_r[i] != sign_r_out[i]) {
@@ -244,6 +240,13 @@ void sm2_test() {
 }
 
 int main() {
+#ifdef BIT32
+	printf("This is the software of 32bit\n");
+	printf("BIGINT is %ld bytes", sizeof(BIGINT));
+#else
+	printf("This is the software of 64bit\n");
+	printf("BIGINT is %ld bytes", sizeof(BIGINT));
+#endif
 	sm2_test();
 	return 0;
 }

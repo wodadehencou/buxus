@@ -3,9 +3,10 @@
 #include "bigint.h"
 
 //frequently used macroes
-#define LOHALF(x) ((BIGINT)((x) & 0xffff))
-#define HIHALF(x) ((BIGINT)((x) >> 16 & 0xffff))
-#define TOHIGH(x) ((BIGINT)((x) << 16))
+#define LOHALF(x) ((BIGINT)((x) & 0xffffffff))
+#define HIHALF(x) ((BIGINT)((x) >> 32 & 0xffffffff))
+#define TOHIGH(x) ((BIGINT)((x) << 32))
+#define ONLYHIGH(x) ((BIGINT)((x) & 0xffffffff00000000))
 
 BIGINT bigint_add (BIGINT* r, BIGINT* a, BIGINT* b) {
 	BIGINT *ap;
@@ -140,116 +141,28 @@ do{												\
 	r1 = r2;
 	r2 = 0;
 
-	mul_and_add(r2, r1, r0, a[4], b[0]);
 	mul_and_add(r2, r1, r0, a[3], b[1]);
 	mul_and_add(r2, r1, r0, a[2], b[2]);
 	mul_and_add(r2, r1, r0, a[1], b[3]);
-	mul_and_add(r2, r1, r0, a[0], b[4]);
 	r[4] = r0;
 	r0 = r1;
 	r1 = r2;
 	r2 = 0;
 
-	mul_and_add(r2, r1, r0, a[5], b[0]);
-	mul_and_add(r2, r1, r0, a[4], b[1]);
 	mul_and_add(r2, r1, r0, a[3], b[2]);
 	mul_and_add(r2, r1, r0, a[2], b[3]);
-	mul_and_add(r2, r1, r0, a[1], b[4]);
-	mul_and_add(r2, r1, r0, a[0], b[5]);
 	r[5] = r0;
 	r0 = r1;
 	r1 = r2;
 	r2 = 0;
 
-	mul_and_add(r2, r1, r0, a[6], b[0]);
-	mul_and_add(r2, r1, r0, a[5], b[1]);
-	mul_and_add(r2, r1, r0, a[4], b[2]);
 	mul_and_add(r2, r1, r0, a[3], b[3]);
-	mul_and_add(r2, r1, r0, a[2], b[4]);
-	mul_and_add(r2, r1, r0, a[1], b[5]);
-	mul_and_add(r2, r1, r0, a[0], b[6]);
 	r[6] = r0;
 	r0 = r1;
 	r1 = r2;
 	r2 = 0;
 
-	mul_and_add(r2, r1, r0, a[7], b[0]);
-	mul_and_add(r2, r1, r0, a[6], b[1]);
-	mul_and_add(r2, r1, r0, a[5], b[2]);
-	mul_and_add(r2, r1, r0, a[4], b[3]);
-	mul_and_add(r2, r1, r0, a[3], b[4]);
-	mul_and_add(r2, r1, r0, a[2], b[5]);
-	mul_and_add(r2, r1, r0, a[1], b[6]);
-	mul_and_add(r2, r1, r0, a[0], b[7]);
 	r[7] = r0;
-	r0 = r1;
-	r1 = r2;
-	r2 = 0;
-
-	mul_and_add(r2, r1, r0, a[7], b[1]);
-	mul_and_add(r2, r1, r0, a[6], b[2]);
-	mul_and_add(r2, r1, r0, a[5], b[3]);
-	mul_and_add(r2, r1, r0, a[4], b[4]);
-	mul_and_add(r2, r1, r0, a[3], b[5]);
-	mul_and_add(r2, r1, r0, a[2], b[6]);
-	mul_and_add(r2, r1, r0, a[1], b[7]);
-	r[8] = r0;
-	r0 = r1;
-	r1 = r2;
-	r2 = 0;
-
-	mul_and_add(r2, r1, r0, a[7], b[2]);
-	mul_and_add(r2, r1, r0, a[6], b[3]);
-	mul_and_add(r2, r1, r0, a[5], b[4]);
-	mul_and_add(r2, r1, r0, a[4], b[5]);
-	mul_and_add(r2, r1, r0, a[3], b[6]);
-	mul_and_add(r2, r1, r0, a[2], b[7]);
-	r[9] = r0;
-	r0 = r1;
-	r1 = r2;
-	r2 = 0;
-
-	mul_and_add(r2, r1, r0, a[7], b[3]);
-	mul_and_add(r2, r1, r0, a[6], b[4]);
-	mul_and_add(r2, r1, r0, a[5], b[5]);
-	mul_and_add(r2, r1, r0, a[4], b[6]);
-	mul_and_add(r2, r1, r0, a[3], b[7]);
-	r[10] = r0;
-	r0 = r1;
-	r1 = r2;
-	r2 = 0;
-
-	mul_and_add(r2, r1, r0, a[7], b[4]);
-	mul_and_add(r2, r1, r0, a[6], b[5]);
-	mul_and_add(r2, r1, r0, a[5], b[6]);
-	mul_and_add(r2, r1, r0, a[4], b[7]);
-	r[11] = r0;
-	r0 = r1;
-	r1 = r2;
-	r2 = 0;
-
-	mul_and_add(r2, r1, r0, a[7], b[5]);
-	mul_and_add(r2, r1, r0, a[6], b[6]);
-	mul_and_add(r2, r1, r0, a[5], b[7]);
-	r[12] = r0;
-	r0 = r1;
-	r1 = r2;
-	r2 = 0;
-
-	mul_and_add(r2, r1, r0, a[7], b[6]);
-	mul_and_add(r2, r1, r0, a[6], b[7]);
-	r[13] = r0;
-	r0 = r1;
-	r1 = r2;
-	r2 = 0;
-
-	mul_and_add(r2, r1, r0, a[7], b[7]);
-	r[14] = r0;
-	r0 = r1;
-	r1 = r2;
-	r2 = 0;
-
-	r[15] = r0;
 #endif
 #undef mul_and_add
 }
@@ -280,8 +193,8 @@ void bigint_sqr(BIGINT* r, BIGINT* a) {
 	s3 = x0*y1+HIHALF(s1)+LOHALF(s2);			\
 	s4 = x1*y1+HIHALF(s3)+HIHALF(s2);			\
 	s3 = TOHIGH(s3)|LOHALF(s1);					\
-	r2 += (s4>>31);								\
-	s4 = (s4<<1) | (s3>>31);					\
+	r2 += (s4>>63);								\
+	s4 = (s4<<1) | (s3>>63);					\
 	s3 <<= 1;									\
 	r0 += s3;									\
 	r1 += (s4 + (r0<s3));						\
@@ -340,7 +253,6 @@ void bigint_sqr(BIGINT* r, BIGINT* a) {
 	r1 = r2;
 	r2 = 0;
 
-	mul_and_doubleadd(r2, r1, r0, a[0], a[4]);
 	mul_and_doubleadd(r2, r1, r0, a[1], a[3]);
 	mul_and_add(r2, r1, r0, a[2], a[2]);
 	r[4] = r0;
@@ -348,84 +260,19 @@ void bigint_sqr(BIGINT* r, BIGINT* a) {
 	r1 = r2;
 	r2 = 0;
 
-	mul_and_doubleadd(r2, r1, r0, a[0], a[5]);
-	mul_and_doubleadd(r2, r1, r0, a[1], a[4]);
 	mul_and_doubleadd(r2, r1, r0, a[2], a[3]);
 	r[5] = r0;
 	r0 = r1;
 	r1 = r2;
 	r2 = 0;
 
-	mul_and_doubleadd(r2, r1, r0, a[0], a[6]);
-	mul_and_doubleadd(r2, r1, r0, a[1], a[5]);
-	mul_and_doubleadd(r2, r1, r0, a[2], a[4]);
 	mul_and_add(r2, r1, r0, a[3], a[3]);
 	r[6] = r0;
 	r0 = r1;
 	r1 = r2;
 	r2 = 0;
 
-	mul_and_doubleadd(r2, r1, r0, a[0], a[7]);
-	mul_and_doubleadd(r2, r1, r0, a[1], a[6]);
-	mul_and_doubleadd(r2, r1, r0, a[2], a[5]);
-	mul_and_doubleadd(r2, r1, r0, a[3], a[4]);
 	r[7] = r0;
-	r0 = r1;
-	r1 = r2;
-	r2 = 0;
-
-	mul_and_doubleadd(r2, r1, r0, a[1], a[7]);
-	mul_and_doubleadd(r2, r1, r0, a[2], a[6]);
-	mul_and_doubleadd(r2, r1, r0, a[3], a[5]);
-	mul_and_add(r2, r1, r0, a[4], a[4]);
-	r[8] = r0;
-	r0 = r1;
-	r1 = r2;
-	r2 = 0;
-
-	mul_and_doubleadd(r2, r1, r0, a[2], a[7]);
-	mul_and_doubleadd(r2, r1, r0, a[3], a[6]);
-	mul_and_doubleadd(r2, r1, r0, a[4], a[5]);
-	r[9] = r0;
-	r0 = r1;
-	r1 = r2;
-	r2 = 0;
-
-	mul_and_doubleadd(r2, r1, r0, a[3], a[7]);
-	mul_and_doubleadd(r2, r1, r0, a[4], a[6]);
-	mul_and_add(r2, r1, r0, a[5], a[5]);
-	r[10] = r0;
-	r0 = r1;
-	r1 = r2;
-	r2 = 0;
-
-	mul_and_doubleadd(r2, r1, r0, a[4], a[7]);
-	mul_and_doubleadd(r2, r1, r0, a[5], a[6]);
-	r[11] = r0;
-	r0 = r1;
-	r1 = r2;
-	r2 = 0;
-
-	mul_and_doubleadd(r2, r1, r0, a[5], a[7]);
-	mul_and_add(r2, r1, r0, a[6], a[6]);
-	r[12] = r0;
-	r0 = r1;
-	r1 = r2;
-	r2 = 0;
-
-	mul_and_doubleadd(r2, r1, r0, a[6], a[7]);
-	r[13] = r0;
-	r0 = r1;
-	r1 = r2;
-	r2 = 0;
-
-	mul_and_add(r2, r1, r0, a[7], a[7]);
-	r[14] = r0;
-	r0 = r1;
-	r1 = r2;
-	r2 = 0;
-
-	r[15] = r0;
 
 #endif
 
@@ -442,14 +289,14 @@ void bigint_mod (BIGINT* r, BIGINT *p) {
 
 void bigint_sm2_modorder(BIGINT* r, BIGINT* a) {
 	BIGINT order[BIGINT_LEN+1] = {
-		0x39D54123, 0x53BBF409, 0x21C6052B, 0x7203DF6B,
-		0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFE,
-		0x00000000,
+		0x53BBF40939D54123, 0x7203DF6B21C6052B,
+		0xFFFFFFFFFFFFFFFF, 0xFFFFFFFEFFFFFFFF,
+		0x0000000000000000,
 	};
 	BIGINT mu[BIGINT_LEN+1] = {
-		0xf15149a0, 0x12ac6361, 0xfa323c01, 0x8dfc2096,
-		0x00000001, 0x00000001, 0x00000001, 0x00000001,
-		0x00000001,
+		0x12ac6361f15149a0, 0x8dfc2096fa323c01,
+		0x0000000100000001, 0x0000000100000001,
+		0x0000000000000001,
 	};
 	// 2^(32*(BIGINT_LEN*2))/order
 
@@ -580,9 +427,10 @@ do{												\
 void bigint_sm2_mod(BIGINT* r, BIGINT* a) {
 	BIGINT w[BIGINT_LEN], carry, borrow, sum;
 	BIGINT p[BIGINT_LEN] = {
-		0xFFFFFFFF, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF,
-		0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFE,
+		0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF00000000,
+		0xFFFFFFFFFFFFFFFF, 0xFFFFFFFEFFFFFFFF,
 	};
+	BIGINT t;
 
 	int i, flag;
 
@@ -597,91 +445,83 @@ do {								\
 	u -= a;							\
 } while (0)
 
+
 	w[0] = 0;
 	carry = 0;
 	add_to_carry(carry, w[0], a[0]);
-	add_to_carry(carry, w[0], a[8]);
-	add_to_carry(carry, w[0], a[9]);
-	add_to_carry(carry, w[0], a[10]);
-	add_to_carry(carry, w[0], a[11]);
-	add_to_carry(carry, w[0], a[12]);
-	add_to_carry(carry, w[0], a[13]);
-	add_to_carry(carry, w[0], a[13]);
-	add_to_carry(carry, w[0], a[14]);
-	add_to_carry(carry, w[0], a[14]);
-	add_to_carry(carry, w[0], a[15]);
-	add_to_carry(carry, w[0], a[15]);
+	add_to_carry(carry, w[0], a[4]);
+	t = (HIHALF(a[4])) | (TOHIGH(a[5]));
+	add_to_carry(carry, w[0], t);
+	add_to_carry(carry, w[0], a[5]);
+	t = (HIHALF(a[5])) | (TOHIGH(a[6]));
+	add_to_carry(carry, w[0], t);
+	add_to_carry(carry, w[0], a[6]);
+	t = (HIHALF(a[6])) | (TOHIGH(a[7]));
+	add_to_carry(carry, w[0], t);
+	add_to_carry(carry, w[0], t);
+	add_to_carry(carry, w[0], a[7]);
+	add_to_carry(carry, w[0], a[7]);
+	t = HIHALF(a[7]);
+	add_to_carry(carry, w[0], t);
+	add_to_carry(carry, w[0], t);
 
 	w[1] = carry;
 	carry = 0;
 	add_to_carry(carry, w[1], a[1]);
-	add_to_carry(carry, w[1], a[9]);
-	add_to_carry(carry, w[1], a[10]);
-	add_to_carry(carry, w[1], a[11]);
-	add_to_carry(carry, w[1], a[12]);
-	add_to_carry(carry, w[1], a[13]);
-	add_to_carry(carry, w[1], a[14]);
-	add_to_carry(carry, w[1], a[14]);
-	add_to_carry(carry, w[1], a[15]);
-	add_to_carry(carry, w[1], a[15]);
+	t = TOHIGH(a[4]);
+	add_to_carry(carry, w[1], t);
+	t = ONLYHIGH(a[5]);
+	add_to_carry(carry, w[1], t);
+	t = TOHIGH(a[6]);
+	add_to_carry(carry, w[1], t);
+	t = ONLYHIGH(a[6]);
+	add_to_carry(carry, w[1], t);
+	add_to_carry(carry, w[1], t);
+	t = TOHIGH(a[7]);
+	add_to_carry(carry, w[1], t);
+	t = ONLYHIGH(a[7]);
+	add_to_carry(carry, w[1], t);
 
 	w[2] = carry;
 	carry = 0;
 	add_to_carry(carry, w[2], a[2]);
+	t = (HIHALF(a[4])) | (TOHIGH(a[5]));
+	add_to_carry(carry, w[2], t);
+	add_to_carry(carry, w[2], a[6]);
+	t = (HIHALF(a[6])) | (TOHIGH(a[7]));
+	add_to_carry(carry, w[2], t);
+	add_to_carry(carry, w[2], a[7]);
+	add_to_carry(carry, w[2], a[7]);
+	t = HIHALF(a[7]);
+	add_to_carry(carry, w[2], t);
 
 	w[3] = carry;
 	carry = 0;
 	add_to_carry(carry, w[3], a[3]);
-	add_to_carry(carry, w[3], a[8]);
-	add_to_carry(carry, w[3], a[11]);
-	add_to_carry(carry, w[3], a[12]);
-	add_to_carry(carry, w[3], a[13]);
-	add_to_carry(carry, w[3], a[13]);
-	add_to_carry(carry, w[3], a[14]);
-	add_to_carry(carry, w[3], a[15]);
+	t = TOHIGH(a[4]);
+	add_to_carry(carry, w[3], t);
+	t = ONLYHIGH(a[4]);
+	add_to_carry(carry, w[3], t);
+	t = TOHIGH(a[5]);
+	add_to_carry(carry, w[3], t);
+	t = ONLYHIGH(a[5]);
+	add_to_carry(carry, w[3], t);
+	t = (HIHALF(a[5])) | (TOHIGH(a[6]));
+	add_to_carry(carry, w[3], t);
+	t = TOHIGH(a[6]);
+	add_to_carry(carry, w[3], t);
+	t = ONLYHIGH(a[6]);
+	add_to_carry(carry, w[3], t);
+	add_to_carry(carry, w[3], t);
+	t = TOHIGH(a[7]);
+	add_to_carry(carry, w[3], t);
+	add_to_carry(carry, w[3], t);
+	add_to_carry(carry, w[3], a[7]);
+	t = (ONLYHIGH(a[7]) | HIHALF(a[7])) ;
+	add_to_carry(carry, w[3], t);
+	t = ONLYHIGH(a[7]);
+	add_to_carry(carry, w[3], t);
 
-	w[4] = carry;
-	carry = 0;
-	add_to_carry(carry, w[4], a[4]);
-	add_to_carry(carry, w[4], a[9]);
-	add_to_carry(carry, w[4], a[12]);
-	add_to_carry(carry, w[4], a[13]);
-	add_to_carry(carry, w[4], a[14]);
-	add_to_carry(carry, w[4], a[14]);
-	add_to_carry(carry, w[4], a[15]);
-
-	w[5] = carry;
-	carry = 0;
-	add_to_carry(carry, w[5], a[5]);
-	add_to_carry(carry, w[5], a[10]);
-	add_to_carry(carry, w[5], a[13]);
-	add_to_carry(carry, w[5], a[14]);
-	add_to_carry(carry, w[5], a[15]);
-	add_to_carry(carry, w[5], a[15]);
-
-	w[6] = carry;
-	carry = 0;
-	add_to_carry(carry, w[6], a[6]);
-	add_to_carry(carry, w[6], a[11]);
-	add_to_carry(carry, w[6], a[14]);
-	add_to_carry(carry, w[6], a[15]);
-
-	w[7] = carry;
-	carry = 0;
-	add_to_carry(carry, w[7], a[7]);
-	add_to_carry(carry, w[7], a[8]);
-	add_to_carry(carry, w[7], a[9]);
-	add_to_carry(carry, w[7], a[10]);
-	add_to_carry(carry, w[7], a[11]);
-	add_to_carry(carry, w[7], a[12]);
-	add_to_carry(carry, w[7], a[12]);
-	add_to_carry(carry, w[7], a[13]);
-	add_to_carry(carry, w[7], a[13]);
-	add_to_carry(carry, w[7], a[14]);
-	add_to_carry(carry, w[7], a[14]);
-	add_to_carry(carry, w[7], a[15]);
-	add_to_carry(carry, w[7], a[15]);
-	add_to_carry(carry, w[7], a[15]);
 
 	r[0] = w[0];
 	borrow = 0;
@@ -691,47 +531,20 @@ do {								\
 	if (r[1] > w[1]) {
 		borrow++;
 	}
+	t = LOHALF(a[4]) + HIHALF(a[4]) + HIHALF(a[6]) + LOHALF(a[7]);
+	sub_to_borrow(borrow, r[1], t);
 
 	r[2] = w[2] - borrow;
 	borrow = 0;
 	if (r[2] > w[2]) {
 		borrow++;
 	}
-	sub_to_borrow(borrow, r[2], a[8]);
-	sub_to_borrow(borrow, r[2], a[9]);
-	sub_to_borrow(borrow, r[2], a[13]);
-	sub_to_borrow(borrow, r[2], a[14]);
 
 	r[3] = w[3] - borrow;
 	borrow = 0;
 	if (r[3] > w[3]) {
 		borrow++;
 	}
-
-	r[4] = w[4] - borrow;
-	borrow = 0;
-	if (r[4] > w[4]) {
-		borrow++;
-	}
-
-	r[5] = w[5] - borrow;
-	borrow = 0;
-	if (r[5] > w[5]) {
-		borrow++;
-	}
-
-	r[6] = w[6] - borrow;
-	borrow = 0;
-	if (r[6] > w[6]) {
-		borrow++;
-	}
-
-	r[7] = w[7] - borrow;
-	borrow = 0;
-	if (r[7] > w[7]) {
-		borrow++;
-	}
-
 
 	if (carry >= borrow) {
 		carry -= borrow;
@@ -764,7 +577,7 @@ void bigint_rshift (BIGINT* r, BIGINT* a) {
 	while (i--) {
 		d1 = d2;
 		d2 = *(ap++);
-		*(rp++) = (d1>>1) | (d2<<31);
+		*(rp++) = (d1>>1) | (d2<<63);
 	}
 	*rp = d2>>1;
 }
@@ -782,9 +595,9 @@ BIGINT bigint_lshift (BIGINT* r, BIGINT* a) {
 	while (i--) {
 		d1 = d2;
 		d2 = *(ap++);
-		*(rp++) = (d1>>31) | (d2<<1);
+		*(rp++) = (d1>>63) | (d2<<1);
 	}
-	return (d2>>31);
+	return (d2>>63);
 }
 
 void bigint_mod_add (BIGINT* r, BIGINT* a, BIGINT* b, BIGINT *p) {
@@ -909,9 +722,9 @@ void bigint_mod_rshift (BIGINT* r, BIGINT* a, BIGINT* p) {
 	while (i--) {
 		d1 = d2;
 		d2 = *(ap++);
-		*(rp++) = (d1>>1) | (d2<<31);
+		*(rp++) = (d1>>1) | (d2<<63);
 	}
-	*rp = (d2>>1) | (carry<<31);
+	*rp = (d2>>1) | (carry<<63);
 }
 
 void bigint_mod_lshift (BIGINT* r, BIGINT* a, BIGINT* p) {
@@ -1003,13 +816,51 @@ void char2bigint (BIGINT *r, UINT8* c) {
 #ifdef BIT32
 	while (i--) {
 		BIGINT t1, t2, t3, t4;
-		t1 = ((*(cp--)) & 0xff);
-		t2 = ((*(cp--)<<8) & 0xff00);
-		t3 = ((*(cp--)<<16) & 0xff0000);
-		t4 = ((*(cp--)<<24) & 0xff000000);
+		t1 = (((*(cp--))) & 0xff);
+		t2 = (((*(cp--))<<8) & 0xff00);
+		t3 = (((*(cp--))<<16) & 0xff0000);
+		t4 = (((*(cp--))<<24) & 0xff000000);
 		*(rp++) = t1 | t2 | t3 | t4;
 	}
 #else
+	while (i--) {
+		BIGINT t1;
+		BIGINT t2=0;
+
+		t1 = *(cp--);
+		t1 &= 0xff;
+		t2 |= t1;
+
+		t1 = *(cp--);
+		t1 = (t1<<8) & 0xff00;
+		t2 |= t1;
+
+		t1 = *(cp--);
+		t1 = (t1<<16) & 0xff0000;
+		t2 |= t1;
+
+		t1 = *(cp--);
+		t1 = (t1<<24) & 0xff000000;
+		t2 |= t1;
+
+		t1 = *(cp--);
+		t1 = (t1<<32) & 0xff00000000;
+		t2 |= t1;
+
+		t1 = *(cp--);
+		t1 = (t1<<40) & 0xff0000000000;
+		t2 |= t1;
+
+		t1 = *(cp--);
+		t1 = (t1<<48) & 0xff000000000000;
+		t2 |= t1;
+
+		t1 = *(cp--);
+		t1 = (t1<<56) & 0xff00000000000000;
+		t2 |= t1;
+
+		*(rp++) = t2;
+	}
 #endif
 }
 
@@ -1028,6 +879,17 @@ void bigint2char (UINT8* r, BIGINT* a) {
 		*(rp++) = (d) & 0xff;
 	}
 #else
+	while (i--) {
+		d = a[i];
+		*(rp++) = (d>>56) & 0xff;
+		*(rp++) = (d>>48) & 0xff;
+		*(rp++) = (d>>40) & 0xff;
+		*(rp++) = (d>>36) & 0xff;
+		*(rp++) = (d>>24) & 0xff;
+		*(rp++) = (d>>16) & 0xff;
+		*(rp++) = (d>>8) & 0xff;
+		*(rp++) = (d) & 0xff;
+	}
 #endif
 }
 
@@ -1054,7 +916,7 @@ void bigint_rshift5 (BIGINT* r, BIGINT* a) {
 	while (i--) {
 		d1 = d2;
 		d2 = *(ap++);
-		*(rp++) = (d1>>5) | (d2<<27);
+		*(rp++) = (d1>>5) | (d2<<59);
 	}
 	*rp = d2>>5;
 }

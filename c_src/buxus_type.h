@@ -6,6 +6,7 @@
 extern "C" {
 #endif
 
+#define BIT64
 #ifndef BIT32
 	#ifndef BIT64
 		#define BIT32
@@ -15,15 +16,16 @@ extern "C" {
 #ifdef BIT32
 	#define BIGINT_LEN 8
 	#define MSB_MASK 0x80000000
+	typedef unsigned int BIGINT;
 #else
 	#define BIGINT_LEN 4
 	#define MSB_MASK 0x8000000000000000
+	typedef long unsigned int BIGINT;
 #endif
 
 typedef unsigned char UINT8;
 typedef unsigned int UINT32;
 //typedef size_t BIGINT;
-typedef unsigned int BIGINT;
 
 //typedef struct {
 //	INT d [BIGINT_LEN],
