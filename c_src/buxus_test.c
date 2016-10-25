@@ -216,16 +216,16 @@ void sm2_performance_test() {
 		affpoint2char(pk, &point_pk);
 
 		gettimeofday(&start, NULL);
-		for (k=0; k<100; k++) {
+		for (k=0; k<1000; k++) {
 			sm2_sign(hash, random, sk, sign_r, sign_s, &group);
 		}
 		gettimeofday(&end, NULL);
 		d1 = end.tv_sec*1000.0 - start.tv_sec*1000.0 + (end.tv_usec - start.tv_usec)/1000.0;
 		fprintf(stdout,"--- total time is %f ms \n", d1);
-		fprintf(stdout,"--- one time is %f ms \n", d1/100);
+		fprintf(stdout,"--- one time is %f ms \n", d1/1000);
 
 		gettimeofday(&start, NULL);
-		for (k=0; k<100; k++) {
+		for (k=0; k<1000; k++) {
 			ret = sm2_verify(hash, pk, sign_r, sign_s, &group);
 			if (ret != 0) {
 				printf("verify error\n");
@@ -234,7 +234,7 @@ void sm2_performance_test() {
 		gettimeofday(&end, NULL);
 		d1 = end.tv_sec*1000.0 - start.tv_sec*1000.0 + (end.tv_usec - start.tv_usec)/1000.0;
 		fprintf(stdout,"--- total time is %f ms \n", d1);
-		fprintf(stdout,"--- one time is %f ms \n", d1/100);
+		fprintf(stdout,"--- one time is %f ms \n", d1/1000);
 	}
 }
 
