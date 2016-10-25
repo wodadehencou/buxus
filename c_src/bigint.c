@@ -605,20 +605,20 @@ void bigint_mod_inv(BIGINT* r, BIGINT* a, BIGINT* p)
 	}
 
 	while (!bigint_is_zero(bu)) {
-		while (bu[0] & 1 == 0) {
+		while ((bu[0] & 1) == 0) {
 			bigint_rshift(bu, bu);
 
-			if (br[0] % 2 == 0) {
+			if ((br[0] & 1) == 0) {
 				bigint_rshift(br, br);
 			}
 			else {
 				bigint_mod_rshift(br, br, p);
 			}// a=(a+P)>>1
 		}
-		while (bv[0] % 2 == 0) {
+		while ((bv[0] & 1) == 0) {
 			bigint_rshift(bv, bv);
 
-			if (bs[0] % 2 == 0) {
+			if ((bs[0] & 1) == 0) {
 				bigint_rshift(bs, bs);
 			}
 			else {
@@ -789,5 +789,93 @@ void bigint_copy (BIGINT* r, BIGINT* a) {
 	while (i--) {
 		*(rp++) = *(ap++);
 	}
+}
+
+void bigint_rshift5 (BIGINT* r, BIGINT* a) {
+	int i = BIGINT_LEN-1;
+	BIGINT *ap;
+	BIGINT *rp;
+	BIGINT d1;
+	BIGINT d2;
+	ap = a;
+	rp = r;
+	d2 = *(ap++);
+	while (i--) {
+		d1 = d2;
+		d2 = *(ap++);
+		*(rp++) = (d1>>5) | (d2<<27);
+	}
+	*rp = d2>>5;
+}
+
+int bigint_compute_wnaf (int *naf, BIGINT *a) { //return is wNAF length
+
+	BIGINT k [BIGINT_LEN];
+	int i;
+	int flag;
+	int flag1 = 0;
+	int carry;
+	int *nafp;
+	BIGINT *kp;
+
+	bigint_copy(k, a);
+	nafp = naf;
+
+	i = 0;
+	while (! flag1 ) {
+		if ((k[0] & 1) == 0) {
+		//if (k[0] % 2 == 0) {
+			*(nafp++) = 0;
+			bigint_rshift(k, k);
+			i++;
+		}
+		else {
+			flag = k[0] & 0x1f; // w[0]^0x1f is the last 5 bit of k
+
+			bigint_rshift5(k, k);
+
+			flag1 = bigint_is_zero(k);
+
+			if (flag < 16) {
+				*(nafp++) = flag;
+				i++;
+				if (! flag1) {
+					*(nafp++) = 0;
+					*(nafp++) = 0;
+					*(nafp++) = 0;
+					*(nafp++) = 0;
+					i+=4;
+				}
+			}
+			else {
+				*(nafp++) = flag - 32;
+
+				// k++
+				kp = k;
+				while (1) {
+					(*kp)++;
+					if ((*kp) != 0) {
+						break;
+					}
+					kp++;
+				}
+				flag1 = 0;
+				*(nafp++) = 0;
+				*(nafp++) = 0;
+				*(nafp++) = 0;
+				*(nafp++) = 0;
+				i+=5;
+			}
+		}
+	}// end while (! flag1)
+	while (1) {
+		if (naf[i-1] == 0) {
+			i--;
+		}
+		else {
+			break;
+		}
+	}// the length of naf, finish NAF
+	return i;
 }
 

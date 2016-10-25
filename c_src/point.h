@@ -18,6 +18,8 @@ void aff_point_mul(AFFPOINT* r, AFFPOINT* p, BIGINT* k, ECGROUP* group);
 void aff_point_mul2(AFFPOINT* r, AFFPOINT* p, BIGINT* k, ECGROUP* group);
 void basepoint_mul(AFFPOINT* r, BIGINT *k, ECGROUP* group);
 void point_mul_add(AFFPOINT* r, BIGINT *k, AFFPOINT* q, BIGINT *l, ECGROUP* group);
+void aff_compute_pre_points (AFFPOINT* r, AFFPOINT* p, ECGROUP* group);
+void aff_point_mul3(AFFPOINT* r, AFFPOINT* p, BIGINT* k, ECGROUP* group);
 void group_set_p(ECGROUP *group, UINT8 *p);
 void group_set_n(ECGROUP *group, UINT8 *n);
 void group_set_g(ECGROUP *group, UINT8 *g);

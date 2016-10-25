@@ -78,7 +78,14 @@ int sm2_function_test() {
 	group_set_p(&group, p);
 	group_set_n(&group, n);
 	group_set_g(&group, g);
+#define DEBUG
+#ifdef DEBUG
+	BIGINT k[BIGINT_LEN] = {4};
+	int naf [257];
+	int len;
+	len = bigint_compute_wnaf(naf, k);
 
+#endif
 	sm2_sign(hash, random, sk, sign_r_out, sign_s_out, &group);
 	for (i=0; i<32; i++) {
 		if (sign_r[i] != sign_r_out[i]) {

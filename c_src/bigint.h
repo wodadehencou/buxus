@@ -29,6 +29,8 @@ int bigint_is_equal (BIGINT *a, BIGINT *b);
 void char2bigint (BIGINT *r, UINT8* c);
 void bigint2char (UINT8* r, BIGINT* a);
 void bigint_copy (BIGINT* r, BIGINT* a);
+void bigint_rshift5 (BIGINT* r, BIGINT* a);
+int bigint_compute_wnaf (int *naf, BIGINT *a);
 
 void bigint_sm2_mod (BIGINT* r, BIGINT *a);
 void bigint_sm2_modorder (BIGINT* r, BIGINT *a);

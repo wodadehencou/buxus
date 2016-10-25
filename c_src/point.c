@@ -221,6 +221,67 @@ void jacobian_affine_point_add(JPOINT* r, JPOINT* p, AFFPOINT* q, ECGROUP* group
 	return;
 }
 
+void jacobian_point_add(JPOINT* r, JPOINT* p, JPOINT* q, ECGROUP* group) {
+	BIGINT t6 [BIGINT_LEN];
+	BIGINT t7 [BIGINT_LEN];
+	BIGINT t8 [BIGINT_LEN];
+	BIGINT t9 [BIGINT_LEN];
+	BIGINT t10 [BIGINT_LEN];
+	BIGINT t11 [BIGINT_LEN];
+
+	if (bigint_is_zero(p->z)) {
+		bigint_copy(r->x, q->x);
+		bigint_copy(r->y, q->y);
+		bigint_copy(r->z, q->z);
+		return;
+	}
+	if (bigint_is_zero(q->z)) {
+		bigint_copy(r->x, p->x);
+		bigint_copy(r->y, p->y);
+		bigint_copy(r->z, p->z);
+		return;
+	}
+
+	bigint_mod_sqr(t6, q->z, group->p);
+	bigint_mod_sqr(t7, p->z, group->p);
+	bigint_mod_mul(t8, p->x, t6, group->p);
+	bigint_mod_mul(t9, q->x, t7, group->p);
+	bigint_mod_mul(t6, q->z, t6, group->p);
+	bigint_mod_mul(t7, p->z, t7, group->p);
+	bigint_mod_mul(t6, p->y, t6, group->p);
+	bigint_mod_mul(t7, q->y, t7, group->p);
+	bigint_mod_sub(t9, t9, t8, group->p);
+	bigint_mod_sub(t7, t7, t6, group->p);
+
+	if (bigint_is_zero(t9)) {
+		if (bigint_is_zero(t7)) {
+			jacobian_point_double(r, p, group);
+		}
+		else {
+			jacobian_set_infinity(r);
+		}
+	}
+
+	bigint_mod_sqr(t10, t9, group->p);
+	bigint_mod_sqr(t11, t7, group->p);
+	bigint_mod_mul(r->x, t9, t10, group->p);
+	bigint_mod_mul(t8, t8, t10, group->p);
+	bigint_mod_lshift(t10, t8, group->p);
+	bigint_mod_sub(t11, t11, r->x, group->p);
+	bigint_mod_sub(t10, t11, t10, group->p);
+	bigint_mod_sub(t8, t8, t10, group->p);
+	bigint_mod_mul(t11, p->z, q->z, group->p);
+	bigint_mod_mul(t7, t7, t8, group->p);
+	bigint_mod_mul(t6, t6, r->x, group->p);
+	bigint_mod_sub(t8, t7, t6, group->p);
+	bigint_mod_mul(t6, t11, t9, group->p);
+	bigint_copy(r->x, t10);
+	bigint_copy(r->y, t8);
+	bigint_copy(r->z, t6);
+
+	return;
+}
+
 void jacobian2affine(AFFPOINT* r, JPOINT* j, ECGROUP* group) {
 	BIGINT r1 [BIGINT_LEN];
 	BIGINT r2 [BIGINT_LEN];
@@ -262,7 +323,7 @@ void aff_point_mul2(AFFPOINT* r, AFFPOINT* p, BIGINT* k, ECGROUP* group) {
 }
 
 void basepoint_mul(AFFPOINT* r, BIGINT *k, ECGROUP* group) {
-	aff_point_mul2(r, &(group->g), k, group);
+	aff_point_mul3(r, &(group->g), k, group);
 }
 
 void point_mul_add(AFFPOINT* r, BIGINT *k, AFFPOINT* q, BIGINT *l, ECGROUP* group) { //kG+lQ
@@ -288,4 +349,93 @@ void group_set_g(ECGROUP *group, UINT8 *g) {
 	char2affpoint(&(group->g), g);
 	return;
 }
+
+void aff_compute_pre_points (AFFPOINT* r, AFFPOINT* p, ECGROUP* group) { //computer (1,3,5,...,15)P
+	JPOINT jp [7];
+	JPOINT jdp;
+	int i;
+	BIGINT c[7][BIGINT_LEN];
+	BIGINT z_inv[7][BIGINT_LEN];
+	BIGINT t1[BIGINT_LEN];
+	BIGINT t2[BIGINT_LEN];
+
+	bigint_copy(r->x, p->x);
+	bigint_copy(r->y, p->y);
+
+	bigint_copy(jdp.x, p->x);
+	bigint_copy(jdp.y, p->y);
+	bigint_set_one(jdp.z);
+
+	jacobian_point_double(&jdp, &jdp, group);
+
+	jacobian_affine_point_add(jp, &jdp, p, group);
+
+	for (i=1; i<7; i++) {
+		jacobian_point_add(jp+i, &jdp, jp+i-1, group);
+	}
+
+	//bigint_copy(c[0], jp[0].z);
+	//for (i=1; i<7; i++) {
+	//	bigint_mod_mul(c[i], c[i-1], jp[i].z, group->p);
+	//}
+	//bigint_mod_inv(c[6], c[6], group->p);
+	//for (i=6; i>0; i--) {
+	//	bigint_mod_mul(z_inv[i], c[i], c[i-1], group->p);
+	//	bigint_mod_mul(c[i-1], c[i], jp[i].z, group->p);
+	//}
+	//bigint_copy(z_inv[0], c[0]);
+	for (i=0; i<7; i++) {
+		bigint_mod_inv(z_inv[i], jp[i].z, group->p);
+	}
+
+	for (i=0; i<7; i++) {
+		bigint_mod_sqr(t1, z_inv[i], group->p);
+		bigint_mod_mul(t2, t1, z_inv[i], group->p);
+		bigint_mod_mul(r[i+1].x, t1, jp[i].x, group->p);
+		bigint_mod_mul(r[i+1].y, t2, jp[i].y, group->p);
+	}
+	return;
+}
+
+void aff_point_mul3(AFFPOINT* r, AFFPOINT* p, BIGINT* k, ECGROUP* group) {
+	int i=256;
+	JPOINT jr;
+	BIGINT local_k[BIGINT_LEN];
+	int naf_len;
+	int naf[257];
+	int naf_v;
+	AFFPOINT pre_point[8];
+	AFFPOINT reverse_point;
+
+	if (bigint_is_zero(k) || (bigint_is_zero(p->x) && bigint_is_zero(p->y))) {
+		aff_set_infinity(r);
+		return;
+	}
+
+	jacobian_set_infinity(&jr);
+	naf_len = bigint_compute_wnaf(naf, k);
+	aff_compute_pre_points(pre_point, p, group);
+
+	for (i=(naf_len-1); i>=0; i--) {
+		jacobian_point_double(&jr, &jr, group);
+		naf_v = naf[i];
+		if (naf_v != 0) {
+			if (naf_v < 0) {
+				naf_v = (0-naf_v-1)>>1;
+				bigint_copy(reverse_point.x ,pre_point[naf_v].x);
+				bigint_sub(reverse_point.y, group->p, pre_point[naf_v].y);
+				jacobian_affine_point_add(&jr, &jr, &reverse_point, group);
+			}
+			else {
+				naf_v = (naf_v-1)>>1;
+				jacobian_affine_point_add(&jr, &jr, pre_point+naf_v, group);
+			}
+		}
+	}
+
+	jacobian2affine(r, &jr, group);
+	return;
+}
+
+
 
