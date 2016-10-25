@@ -591,6 +591,14 @@ do {								\
 	w += a;	if (w < a) {carry++;}   \
 } while (0)
 
+#define add_double_to_carry(carry, w, a)	\
+do {										\
+	BIGINT t;								\
+	t = (a<<1);								\
+	carry += (a>>31);						\
+	w += t;	if (w < t) {carry++;}   		\
+} while (0)
+
 #define sub_to_borrow(borrow, u, a)	\
 do {								\
 	if (u < a) {borrow++;}			\
@@ -605,12 +613,9 @@ do {								\
 	add_to_carry(carry, w[0], a[10]);
 	add_to_carry(carry, w[0], a[11]);
 	add_to_carry(carry, w[0], a[12]);
-	add_to_carry(carry, w[0], a[13]);
-	add_to_carry(carry, w[0], a[13]);
-	add_to_carry(carry, w[0], a[14]);
-	add_to_carry(carry, w[0], a[14]);
-	add_to_carry(carry, w[0], a[15]);
-	add_to_carry(carry, w[0], a[15]);
+	add_double_to_carry(carry, w[0], a[13]);
+	add_double_to_carry(carry, w[0], a[14]);
+	add_double_to_carry(carry, w[0], a[15]);
 
 	w[1] = carry;
 	carry = 0;
@@ -620,10 +625,8 @@ do {								\
 	add_to_carry(carry, w[1], a[11]);
 	add_to_carry(carry, w[1], a[12]);
 	add_to_carry(carry, w[1], a[13]);
-	add_to_carry(carry, w[1], a[14]);
-	add_to_carry(carry, w[1], a[14]);
-	add_to_carry(carry, w[1], a[15]);
-	add_to_carry(carry, w[1], a[15]);
+	add_double_to_carry(carry, w[1], a[14]);
+	add_double_to_carry(carry, w[1], a[15]);
 
 	w[2] = carry;
 	carry = 0;
@@ -635,8 +638,7 @@ do {								\
 	add_to_carry(carry, w[3], a[8]);
 	add_to_carry(carry, w[3], a[11]);
 	add_to_carry(carry, w[3], a[12]);
-	add_to_carry(carry, w[3], a[13]);
-	add_to_carry(carry, w[3], a[13]);
+	add_double_to_carry(carry, w[3], a[13]);
 	add_to_carry(carry, w[3], a[14]);
 	add_to_carry(carry, w[3], a[15]);
 
@@ -646,8 +648,7 @@ do {								\
 	add_to_carry(carry, w[4], a[9]);
 	add_to_carry(carry, w[4], a[12]);
 	add_to_carry(carry, w[4], a[13]);
-	add_to_carry(carry, w[4], a[14]);
-	add_to_carry(carry, w[4], a[14]);
+	add_double_to_carry(carry, w[4], a[14]);
 	add_to_carry(carry, w[4], a[15]);
 
 	w[5] = carry;
@@ -656,8 +657,7 @@ do {								\
 	add_to_carry(carry, w[5], a[10]);
 	add_to_carry(carry, w[5], a[13]);
 	add_to_carry(carry, w[5], a[14]);
-	add_to_carry(carry, w[5], a[15]);
-	add_to_carry(carry, w[5], a[15]);
+	add_double_to_carry(carry, w[5], a[15]);
 
 	w[6] = carry;
 	carry = 0;
@@ -673,30 +673,18 @@ do {								\
 	add_to_carry(carry, w[7], a[9]);
 	add_to_carry(carry, w[7], a[10]);
 	add_to_carry(carry, w[7], a[11]);
-	add_to_carry(carry, w[7], a[12]);
-	add_to_carry(carry, w[7], a[12]);
-	add_to_carry(carry, w[7], a[13]);
-	add_to_carry(carry, w[7], a[13]);
-	add_to_carry(carry, w[7], a[14]);
-	add_to_carry(carry, w[7], a[14]);
-	add_to_carry(carry, w[7], a[15]);
-	add_to_carry(carry, w[7], a[15]);
+	add_double_to_carry(carry, w[7], a[12]);
+	add_double_to_carry(carry, w[7], a[13]);
+	add_double_to_carry(carry, w[7], a[14]);
+	add_double_to_carry(carry, w[7], a[15]);
 	add_to_carry(carry, w[7], a[15]);
 
 	r[0] = w[0];
-	borrow = 0;
 
-	r[1] = w[1] - borrow;
-	borrow = 0;
-	if (r[1] > w[1]) {
-		borrow++;
-	}
+	r[1] = w[1];
 
-	r[2] = w[2] - borrow;
+	r[2] = w[2];
 	borrow = 0;
-	if (r[2] > w[2]) {
-		borrow++;
-	}
 	sub_to_borrow(borrow, r[2], a[8]);
 	sub_to_borrow(borrow, r[2], a[9]);
 	sub_to_borrow(borrow, r[2], a[13]);
@@ -1002,12 +990,26 @@ void char2bigint (BIGINT *r, UINT8* c) {
 
 #ifdef BIT32
 	while (i--) {
-		BIGINT t1, t2, t3, t4;
-		t1 = ((*(cp--)) & 0xff);
-		t2 = ((*(cp--)<<8) & 0xff00);
-		t3 = ((*(cp--)<<16) & 0xff0000);
-		t4 = ((*(cp--)<<24) & 0xff000000);
-		*(rp++) = t1 | t2 | t3 | t4;
+		BIGINT t1;
+		BIGINT t2=0;
+
+		t1 = *(cp--);
+		t1 &= 0xff;
+		t2 |= t1;
+
+		t1 = *(cp--);
+		t1 = (t1<<8) & 0xff00;
+		t2 |= t1;
+
+		t1 = *(cp--);
+		t1 = (t1<<16) & 0xff0000;
+		t2 |= t1;
+
+		t1 = *(cp--);
+		t1 = (t1<<24) & 0xff000000;
+		t2 |= t1;
+
+		*(rp++) = t2;
 	}
 #else
 #endif
