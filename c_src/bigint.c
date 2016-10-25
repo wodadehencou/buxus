@@ -884,7 +884,7 @@ void bigint2char (UINT8* r, BIGINT* a) {
 		*(rp++) = (d>>56) & 0xff;
 		*(rp++) = (d>>48) & 0xff;
 		*(rp++) = (d>>40) & 0xff;
-		*(rp++) = (d>>36) & 0xff;
+		*(rp++) = (d>>32) & 0xff;
 		*(rp++) = (d>>24) & 0xff;
 		*(rp++) = (d>>16) & 0xff;
 		*(rp++) = (d>>8) & 0xff;
