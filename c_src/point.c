@@ -374,19 +374,19 @@ void aff_compute_pre_points (AFFPOINT* r, AFFPOINT* p, ECGROUP* group) { //compu
 		jacobian_point_add(jp+i, &jdp, jp+i-1, group);
 	}
 
-	//bigint_copy(c[0], jp[0].z);
-	//for (i=1; i<7; i++) {
-	//	bigint_mod_mul(c[i], c[i-1], jp[i].z, group->p);
-	//}
-	//bigint_mod_inv(c[6], c[6], group->p);
-	//for (i=6; i>0; i--) {
-	//	bigint_mod_mul(z_inv[i], c[i], c[i-1], group->p);
-	//	bigint_mod_mul(c[i-1], c[i], jp[i].z, group->p);
-	//}
-	//bigint_copy(z_inv[0], c[0]);
-	for (i=0; i<7; i++) {
-		bigint_mod_inv(z_inv[i], jp[i].z, group->p);
+	bigint_copy(c[0], jp[0].z);
+	for (i=1; i<7; i++) {
+		bigint_mod_mul(c[i], c[i-1], jp[i].z, group->p);
 	}
+	bigint_mod_inv(c[6], c[6], group->p);
+	for (i=6; i>0; i--) {
+		bigint_mod_mul(z_inv[i], c[i], c[i-1], group->p);
+		bigint_mod_mul(c[i-1], c[i], jp[i].z, group->p);
+	}
+	bigint_copy(z_inv[0], c[0]);
+	//for (i=0; i<7; i++) {
+	//	bigint_mod_inv(z_inv[i], jp[i].z, group->p);
+	//}
 
 	for (i=0; i<7; i++) {
 		bigint_mod_sqr(t1, z_inv[i], group->p);
