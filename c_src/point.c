@@ -398,9 +398,8 @@ void aff_compute_pre_points (AFFPOINT* r, AFFPOINT* p, ECGROUP* group) { //compu
 }
 
 void aff_point_mul3(AFFPOINT* r, AFFPOINT* p, BIGINT* k, ECGROUP* group) {
-	int i=256;
+	int i;
 	JPOINT jr;
-	BIGINT local_k[BIGINT_LEN];
 	int naf_len;
 	int naf[257];
 	int naf_v;
@@ -437,5 +436,66 @@ void aff_point_mul3(AFFPOINT* r, AFFPOINT* p, BIGINT* k, ECGROUP* group) {
 	return;
 }
 
+void point_mul_add2(AFFPOINT* r, BIGINT *k, AFFPOINT* q, BIGINT *l, ECGROUP* group) { //kG+lQ
+	int i;
+	JPOINT jr;
+	int k_naf_len;
+	int k_naf[257];
+	int k_naf_v;
+	int l_naf_len;
+	int l_naf[257];
+	int l_naf_v;
+	AFFPOINT g_pre_point[8];
+	AFFPOINT q_pre_point[8];
+	AFFPOINT reverse_point;
 
+	jacobian_set_infinity(&jr);
+	k_naf_len = bigint_compute_wnaf(k_naf, k);
+	l_naf_len = bigint_compute_wnaf(l_naf, l);
+	aff_compute_pre_points(g_pre_point, &(group->g), group);
+	aff_compute_pre_points(q_pre_point, q, group);
 
+	if (k_naf_len > l_naf_len) {
+		i = k_naf_len-1;
+	}
+	else {
+		i = l_naf_len-1;
+	}
+
+	for (; i>=0; i--) {
+		jacobian_point_double(&jr, &jr, group);
+		if (i < k_naf_len) {
+			k_naf_v = k_naf[i];
+			if (k_naf_v != 0) {
+				if (k_naf_v < 0) {
+					k_naf_v = (0-k_naf_v-1)>>1;
+					bigint_copy(reverse_point.x ,g_pre_point[k_naf_v].x);
+					bigint_sub(reverse_point.y, group->p, g_pre_point[k_naf_v].y);
+					jacobian_affine_point_add(&jr, &jr, &reverse_point, group);
+				}
+				else {
+					k_naf_v = (k_naf_v-1)>>1;
+					jacobian_affine_point_add(&jr, &jr, g_pre_point+k_naf_v, group);
+				}
+			}
+		}
+		if (i < l_naf_len) {
+			l_naf_v = l_naf[i];
+			if (l_naf_v != 0) {
+				if (l_naf_v < 0) {
+					l_naf_v = (0-l_naf_v-1)>>1;
+					bigint_copy(reverse_point.x ,q_pre_point[l_naf_v].x);
+					bigint_sub(reverse_point.y, group->p, q_pre_point[l_naf_v].y);
+					jacobian_affine_point_add(&jr, &jr, &reverse_point, group);
+				}
+				else {
+					l_naf_v = (l_naf_v-1)>>1;
+					jacobian_affine_point_add(&jr, &jr, q_pre_point+l_naf_v, group);
+				}
+			}
+		}
+	}
+
+	jacobian2affine(r, &jr, group);
+	return;
+}
