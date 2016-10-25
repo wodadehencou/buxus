@@ -81,7 +81,7 @@ int sm2_verify (UINT8* hash, UINT8* pk, UINT8* sign_r, UINT8* sign_s, ECGROUP* g
 	}
 
 	char2affpoint(&pa, pk);
-	point_mul_add2(&point, big_s, &pa, big_t, group); //sG+tPA
+	point_mul_add(&point, big_s, &pa, big_t, group); //sG+tPA
 
 	bigint_mod_add(big_s, big_e, point.x, group->order);
 	if (bigint_is_equal(big_r, big_s) == 1) {

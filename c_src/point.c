@@ -17,107 +17,6 @@ void aff_set_infinity(AFFPOINT *r) {
 	bigint_set_zero(r->y);
 }
 
-void aff_point_double(AFFPOINT* r, AFFPOINT* p, ECGROUP* group) {
-
-	BIGINT r1 [BIGINT_LEN];
-	BIGINT r2 [BIGINT_LEN];
-	BIGINT r3 [BIGINT_LEN];
-	BIGINT x3 [BIGINT_LEN];
-	BIGINT con1 [BIGINT_LEN] = {1};
-
-	if (bigint_is_zero(p->x) && (bigint_is_zero(p->y))) {
-		aff_set_infinity(r);
-		return;
-	}
-
-//#ifdef SM2
-	bigint_mod_sqr(r1, p->x, group->p);
-	bigint_mod_sub(r1, r1, con1, group->p);
-	bigint_mod_lshift(r2, r1, group->p);
-	bigint_mod_add(r1, r2, r1, group->p);
-//#else
-//	bigint_mod_sqr(r1, p->x, group->p);
-//	bigint_mod_lshift(r2, r1, group->p);
-//	bigint_mod_add(r1, r2, r1, group->p);
-//	bigint_mod_add(r1, r1, group->a, group->p);
-//#endif
-
-	bigint_mod_lshift(r2, p->y, group->p);
-	bigint_mod_inv(r2, r2, group->p);
-	bigint_mod_mul(r1, r1, r2, group->p); //lamada
-	bigint_mod_sqr(r2, r1, group->p);
-	bigint_mod_lshift(r3, p->x, group->p);
-	bigint_mod_sub(x3, r2, r3, group->p);
-	bigint_mod_sub(r3, p->x, x3, group->p);
-	bigint_mod_mul(r2, r1, r3, group->p);
-	bigint_copy(r->x, x3);
-	bigint_mod_sub(r->y, r2, p->y, group->p);
-	return;
-}
-
-void aff_point_add(AFFPOINT* r, AFFPOINT* p, AFFPOINT* q, ECGROUP* group) {
-
-	BIGINT r1 [BIGINT_LEN];
-	BIGINT r2 [BIGINT_LEN];
-	BIGINT r3 [BIGINT_LEN];
-	BIGINT x3 [BIGINT_LEN];
-
-	if (bigint_is_zero(p->x) && (bigint_is_zero(p->y))) {
-		bigint_copy(r->x, q->x);
-		bigint_copy(r->y, q->y);
-		return;
-	}
-	if (bigint_is_zero(q->x) && (bigint_is_zero(q->y))) {
-		bigint_copy(r->x, p->x);
-		bigint_copy(r->y, p->y);
-		return;
-	}
-	if (bigint_is_equal(p->x, q->x)) {
-		if (bigint_is_equal(p->y, q->y)) {
-			aff_point_double(r, p, group);
-			return;
-		}
-		else {
-			aff_set_infinity(r);
-			return;
-		}
-	}
-
-	bigint_mod_sub(r1, q->x, p->x, group->p);
-	bigint_mod_sub(r2, q->y, p->y, group->p);
-	bigint_mod_inv(r1, r1, group->p);
-	bigint_mod_mul(r1, r1, r2, group->p); //lamada
-	bigint_mod_sqr(r2, r1, group->p);
-	bigint_mod_add(r3, p->x, q->x, group->p);
-	bigint_mod_sub(x3, r2, r3, group->p);
-	bigint_mod_sub(r3, p->x, x3, group->p);
-	bigint_mod_mul(r2, r1, r3, group->p);
-	bigint_copy(r->x, x3);
-	bigint_mod_sub(r->y, r2, p->y, group->p);
-	return;
-}
-
-void aff_point_mul(AFFPOINT* r, AFFPOINT* p, BIGINT* k, ECGROUP* group) {
-	int i=256;
-	BIGINT local_k[BIGINT_LEN];
-
-	if (bigint_is_zero(k) || (bigint_is_zero(p->x) && bigint_is_zero(p->y))) {
-		aff_set_infinity(r);
-		return;
-	}
-
-	aff_set_infinity(r);
-	bigint_copy(local_k, k);
-	while(i--) {
-		aff_point_double(r, r, group);
-		if ((local_k[BIGINT_LEN-1] & MSB_MASK) == MSB_MASK) {
-			aff_point_add(r, r, p, group);
-		}
-		bigint_lshift(local_k, local_k);
-	}
-	return;
-}
-
 void jacobian_set_infinity(JPOINT *r) {
 	bigint_set_one(r->x);
 	bigint_set_one(r->y);
@@ -137,19 +36,12 @@ void jacobian_point_double(JPOINT* r, JPOINT* p, ECGROUP* group) {
 		return;
 	}
 
-//#ifdef SM2
 	bigint_mod_sqr(r1, p->z, group->p); //z^2
 	bigint_mod_sub(r2, p->x, r1, group->p); //x-z^2
 	bigint_mod_add(r1, p->x, r1, group->p); //x+z^2
 	bigint_mod_mul(r2, r1, r2, group->p); //x^2-z^4
 	bigint_mod_lshift(r1, r2, group->p); //2(x^2-z^4)
 	bigint_mod_add(r1, r1, r2, group->p); //3(x^2-z^4)=B
-//#else
-//	bigint_mod_sqr(r1, p->x, group->p);
-//	bigint_mod_lshift(r2, r1, group->p);
-//	bigint_mod_add(r1, r2, r1, group->p);
-//	bigint_mod_add(r1, r1, group->a, group->p);
-//#endif
 
 	bigint_mod_mul(r2, p->y, p->z, group->p); //yz
 	bigint_mod_lshift(r->z, r2, group->p); //2yz
@@ -298,43 +190,6 @@ void jacobian2affine(AFFPOINT* r, JPOINT* j, ECGROUP* group) {
 	return;
 }
 
-void aff_point_mul2(AFFPOINT* r, AFFPOINT* p, BIGINT* k, ECGROUP* group) {
-	int i=256;
-	JPOINT jr;
-	BIGINT local_k[BIGINT_LEN];
-
-	if (bigint_is_zero(k) || (bigint_is_zero(p->x) && bigint_is_zero(p->y))) {
-		aff_set_infinity(r);
-		return;
-	}
-
-	jacobian_set_infinity(&jr);
-	bigint_copy(local_k, k);
-	while(i--) {
-		jacobian_point_double(&jr, &jr, group);
-		if ((local_k[BIGINT_LEN-1] & MSB_MASK) == MSB_MASK) {
-			jacobian_affine_point_add(&jr, &jr, p, group);
-		}
-		bigint_lshift(local_k, local_k);
-	}
-
-	jacobian2affine(r, &jr, group);
-	return;
-}
-
-void basepoint_mul(AFFPOINT* r, BIGINT *k, ECGROUP* group) {
-	aff_point_mul3(r, &(group->g), k, group);
-}
-
-void point_mul_add(AFFPOINT* r, BIGINT *k, AFFPOINT* q, BIGINT *l, ECGROUP* group) { //kG+lQ
-	AFFPOINT kg;
-	AFFPOINT lq;
-	basepoint_mul(&kg, k, group);
-	aff_point_mul(&lq, q, l, group);
-	aff_point_add(r, &kg, &lq, group);
-	return;
-}
-
 void group_set_p(ECGROUP *group, UINT8 *p) {
 	char2bigint(group->p, p);
 	return;
@@ -350,7 +205,7 @@ void group_set_g(ECGROUP *group, UINT8 *g) {
 	return;
 }
 
-void aff_compute_pre_points (AFFPOINT* r, AFFPOINT* p, ECGROUP* group) { //computer (1,3,5,...,15)P
+void compute_pre_points (AFFPOINT* r, AFFPOINT* p, ECGROUP* group) { //computer (1,3,5,...,15)P
 	JPOINT jp [7];
 	JPOINT jdp;
 	int i;
@@ -384,9 +239,6 @@ void aff_compute_pre_points (AFFPOINT* r, AFFPOINT* p, ECGROUP* group) { //compu
 		bigint_mod_mul(c[i-1], c[i], jp[i].z, group->p);
 	}
 	bigint_copy(z_inv[0], c[0]);
-	//for (i=0; i<7; i++) {
-	//	bigint_mod_inv(z_inv[i], jp[i].z, group->p);
-	//}
 
 	for (i=0; i<7; i++) {
 		bigint_mod_sqr(t1, z_inv[i], group->p);
@@ -397,7 +249,7 @@ void aff_compute_pre_points (AFFPOINT* r, AFFPOINT* p, ECGROUP* group) { //compu
 	return;
 }
 
-void aff_point_mul3(AFFPOINT* r, AFFPOINT* p, BIGINT* k, ECGROUP* group) {
+void point_mul(AFFPOINT* r, AFFPOINT* p, BIGINT* k, ECGROUP* group) {
 	int i;
 	JPOINT jr;
 	int naf_len;
@@ -413,7 +265,7 @@ void aff_point_mul3(AFFPOINT* r, AFFPOINT* p, BIGINT* k, ECGROUP* group) {
 
 	jacobian_set_infinity(&jr);
 	naf_len = bigint_compute_wnaf(naf, k);
-	aff_compute_pre_points(pre_point, p, group);
+	compute_pre_points(pre_point, p, group);
 
 	for (i=(naf_len-1); i>=0; i--) {
 		jacobian_point_double(&jr, &jr, group);
@@ -436,7 +288,11 @@ void aff_point_mul3(AFFPOINT* r, AFFPOINT* p, BIGINT* k, ECGROUP* group) {
 	return;
 }
 
-void point_mul_add2(AFFPOINT* r, BIGINT *k, AFFPOINT* q, BIGINT *l, ECGROUP* group) { //kG+lQ
+void basepoint_mul(AFFPOINT* r, BIGINT *k, ECGROUP* group) {
+	point_mul(r, &(group->g), k, group);
+}
+
+void point_mul_add(AFFPOINT* r, BIGINT *k, AFFPOINT* q, BIGINT *l, ECGROUP* group) { //kG+lQ
 	int i;
 	JPOINT jr;
 	int k_naf_len;
@@ -452,8 +308,8 @@ void point_mul_add2(AFFPOINT* r, BIGINT *k, AFFPOINT* q, BIGINT *l, ECGROUP* gro
 	jacobian_set_infinity(&jr);
 	k_naf_len = bigint_compute_wnaf(k_naf, k);
 	l_naf_len = bigint_compute_wnaf(l_naf, l);
-	aff_compute_pre_points(g_pre_point, &(group->g), group);
-	aff_compute_pre_points(q_pre_point, q, group);
+	compute_pre_points(g_pre_point, &(group->g), group);
+	compute_pre_points(q_pre_point, q, group);
 
 	if (k_naf_len > l_naf_len) {
 		i = k_naf_len-1;
