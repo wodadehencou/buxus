@@ -3,8 +3,8 @@
 #include <sys/time.h>
 #include <time.h>
 #include "buxus_type.h"
-#include "point.h"
 #include "bigint.h"
+#include "point.h"
 #include "sm2_algo.h"
 
 int sm2_function_test() {
@@ -242,10 +242,10 @@ void sm2_test() {
 int main() {
 #ifdef BIT32
 	printf("This is the software of 32bit\n");
-	printf("BIGINT is %ld bytes", sizeof(BIGINT));
+	printf("BIGINT is %ld bytes\n", sizeof(BIGINT));
 #else
 	printf("This is the software of 64bit\n");
-	printf("BIGINT is %ld bytes", sizeof(BIGINT));
+	printf("BIGINT is %ld bytes\n", sizeof(BIGINT));
 #endif
 	sm2_test();
 	return 0;
