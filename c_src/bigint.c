@@ -92,8 +92,7 @@ do{												\
 }while (0) /* add x*y to (r2, r1, r0) */
 
 
-#define FAST
-#ifndef FAST
+#ifdef SMALL_CODE
 	/* multiplication */
 	for (k=0; k<=2*(BIGINT_LEN-1); k++) {
 		i = (k-(BIGINT_LEN-1) <= 0) ? 0: (k-(BIGINT_LEN-1));
@@ -288,8 +287,7 @@ void bigint_sqr(BIGINT* r, BIGINT* a) {
 	r1 += (s4 + (r0<s3));						\
 	r2 += ((r1<s4)||((r1==s4)&&(r0<s3)));
 
-#define FAST
-#ifndef FAST
+#ifdef SMALL_CODE
 	//bigint_mul(r, a, a);
 
 	/* multiplication */
