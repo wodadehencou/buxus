@@ -12,44 +12,33 @@ extern "C" {
 	#endif
 #endif
 
-#ifdef BIT32
-	#define BIGINT_LEN 8
-	#define MSB_MASK 0x80000000
-	typedef unsigned int BIGINT;
-#else
-	#define BIGINT_LEN 4
-	#define MSB_MASK 0x8000000000000000
-	typedef long unsigned int BIGINT;
-#endif
-
 typedef unsigned char UINT8;
 typedef unsigned int UINT32;
-//typedef size_t BIGINT;
-
-//typedef struct {
-//	INT d [BIGINT_LEN],
-//} BIGINT;
-//typedef BIGINT_st* BIGINT;
+typedef unsigned long long int UINT64;
+#ifdef BIT32
+	#define BIGINT_LEN 8
+	typedef UINT32 BIGINT;
+#else
+	#define BIGINT_LEN 4
+	typedef UINT64 BIGINT;
+#endif
 
 typedef struct {
 	BIGINT x [BIGINT_LEN];
 	BIGINT y [BIGINT_LEN];
 } AFFPOINT;
-//typedef AFFPOINT_st* AFFPOINT;
 
 typedef struct {
 	BIGINT x [BIGINT_LEN];
 	BIGINT y [BIGINT_LEN];
 	BIGINT z [BIGINT_LEN];
 } JPOINT;
-//typedef JPOINT_st* JPOINT;
 
 typedef struct {
 	BIGINT p		[BIGINT_LEN]	;
 	BIGINT order	[BIGINT_LEN]	;
 	AFFPOINT g;
 } ECGROUP;
-//typedef ECGROUP_st* ECGROUP;
 
 #ifdef __cplusplus
 }
