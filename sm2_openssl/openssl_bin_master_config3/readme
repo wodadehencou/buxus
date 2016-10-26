@@ -1,0 +1,2 @@
+./config -d -pg  no-autoalginit no-dso no-shared no-threads
+
