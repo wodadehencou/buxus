@@ -433,6 +433,7 @@ void bigint_sm2_mod(BIGINT* r, BIGINT* a) {
 	BIGINT t;
 
 	int i, flag;
+	BIGINT carry2;
 
 #define add_to_carry(carry, w, a)	\
 do {								\
@@ -522,6 +523,23 @@ do {								\
 	t = ONLYHIGH(a[7]);
 	add_to_carry(carry, w[3], t);
 
+	carry2 = carry;
+	t = carry2;
+	carry = 0;
+	add_to_carry(carry, w[0], t);
+
+	t = carry | TOHIGH(carry2);
+	carry = 0;
+	add_to_carry(carry, w[1], t);
+
+	t = carry;
+	carry = 0;
+	add_to_carry(carry, w[2], t);
+
+	t = carry | TOHIGH(carry2);
+	carry = 0;
+	add_to_carry(carry, w[3], t);
+
 
 	r[0] = w[0];
 	borrow = 0;
@@ -531,7 +549,7 @@ do {								\
 	if (r[1] > w[1]) {
 		borrow++;
 	}
-	t = LOHALF(a[4]) + HIHALF(a[4]) + HIHALF(a[6]) + LOHALF(a[7]);
+	t = LOHALF(a[4]) + HIHALF(a[4]) + HIHALF(a[6]) + LOHALF(a[7]) + carry2;
 	sub_to_borrow(borrow, r[1], t);
 
 	r[2] = w[2] - borrow;

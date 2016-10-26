@@ -585,6 +585,8 @@ void bigint_sm2_mod(BIGINT* r, BIGINT* a) {
 	};
 
 	int i, flag;
+	BIGINT carry2;
+	BIGINT carry3;
 
 #define add_to_carry(carry, w, a)	\
 do {								\
@@ -679,6 +681,39 @@ do {								\
 	add_double_to_carry(carry, w[7], a[15]);
 	add_to_carry(carry, w[7], a[15]);
 
+	carry2 = carry;
+	carry3 = carry2;
+	carry = 0;
+	add_to_carry(carry, w[0], carry3);
+
+	carry3 = carry;
+	carry = 0;
+	add_to_carry(carry, w[1], carry3);
+
+	carry3 = carry;
+	carry = 0;
+	add_to_carry(carry, w[2], carry3);
+
+	carry3 = carry + carry2;
+	carry = 0;
+	add_to_carry(carry, w[3], carry3);
+
+	carry3 = carry;
+	carry = 0;
+	add_to_carry(carry, w[4], carry3);
+
+	carry3 = carry;
+	carry = 0;
+	add_to_carry(carry, w[5], carry3);
+
+	carry3 = carry;
+	carry = 0;
+	add_to_carry(carry, w[6], carry3);
+
+	carry3 = carry + carry2;
+	carry = 0;
+	add_to_carry(carry, w[7], carry3);
+
 	r[0] = w[0];
 
 	r[1] = w[1];
@@ -689,6 +724,7 @@ do {								\
 	sub_to_borrow(borrow, r[2], a[9]);
 	sub_to_borrow(borrow, r[2], a[13]);
 	sub_to_borrow(borrow, r[2], a[14]);
+	sub_to_borrow(borrow, r[2], carry2);
 
 	r[3] = w[3] - borrow;
 	borrow = 0;

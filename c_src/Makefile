@@ -46,8 +46,12 @@ buxus_test.exe: bigint.o point.o sm2_algo.o buxus_test.o
 run: buxus_test.exe
 	./buxus_test.exe
 
+perf: ./buxus_test.exe
+	perf record -g -e cycles ./buxus_test.exe
+	perf report
+
 clean:
-	rm -rf *.o *.exe
+	rm -rf *.o *.exe perf*
 
 help:
 	@echo "Use \"make\" to do default compile (MAXIMUM performance with performace test)"
