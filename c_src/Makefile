@@ -1,17 +1,40 @@
 default: buxus_test.exe
 
-#CFLAG = -g3
-CFLAG = -O3
+BITS=32
+PERF=1
+DBG=0
+
 #COMPILER = gcc
 COMPILER = clang
+CFLAG=
 
-bigint.o: bigint.c bigint.h buxus_type.h
-	${COMPILER} ${CFLAG} -o bigint.o -c bigint.c
+ifeq (${DBG},1)
+  CFLAG += -g3
+else
+  CFLAG = -O3
+endif
 
-point.o: point.c point.h buxus_type.h
+ifeq (${BITS},64)
+  CFLAG += -DBIT64
+  BIGINT=bigint_64.c
+else
+  CFLAG += -DBIT32
+  BIGINT=bigint.c
+endif
+
+ifeq (${PERF},1)
+  CFLAG += -DLINUX_PERFORMANCE
+endif
+
+$(patsubst %.c,%.o,$(wildcard *.c)): buxus_type.h
+
+bigint.o: ${BIGINT} bigint.h
+	${COMPILER} ${CFLAG} -o bigint.o -c ${BIGINT}
+
+point.o: point.c point.h 
 	${COMPILER} ${CFLAG} -o point.o -c point.c
 
-sm2_algo.o: sm2_algo.c sm2_algo.h buxus_type.h
+sm2_algo.o: sm2_algo.c sm2_algo.h 
 	${COMPILER} ${CFLAG} -o sm2_algo.o -c sm2_algo.c
 
 buxus_test.o: buxus_test.c
@@ -27,9 +50,13 @@ clean:
 	rm -rf *.o *.exe
 
 help:
-	@echo "Use \"make\" to do default compile (MAXIMUM performance)"
-	@echo "Use \"make CFLAG=-O3\" to enable maximum optimization"
-	@echo "Use \"make CFLAG=-g3\" to enable debug"
+	@echo "Use \"make\" to do default compile (MAXIMUM performance with performace test)"
+	@echo "Use \"make DBG=0\" to enable maximum optimization"
+	@echo "Use \"make DBG=1\" to enable debug"
 	@echo "Use \"make COMPILER=gcc\" to select gcc compiler"
+	@echo "Use \"make BITS=64\" to select 64bit design"
+	@echo "Use \"make BITS=32\" to select 32bit design"
+	@echo "Use \"make PERF=1\" to enable performance test on Linux"
+	@echo "Use \"make PERF=0\" to disable performance test"
 	@echo "Use \"make run\" to run the test"
 

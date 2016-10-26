@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
 #include <time.h>
+#ifdef LINUX_PERFORMANCE
+#define PERFORMANCE
+#include <sys/time.h>
+#endif
 #include "buxus_type.h"
 #include "bigint.h"
 #include "point.h"
@@ -105,6 +108,7 @@ int sm2_function_test() {
 	}
 	return flag;
 }
+
 void digitrand(unsigned char *x, int len) {
 	int i, j;
 	static int seed = 1;
@@ -190,9 +194,11 @@ void sm2_performance_test() {
 	int i, j, k;
 	int ret;
 	int flag = 0;
+#ifdef LINUX_PERFORMANCE
 	struct timeval start;
 	struct timeval end;
 	double d1;
+#endif
 
 	group_set_p(&group, p);
 	group_set_n(&group, n);
@@ -211,32 +217,40 @@ void sm2_performance_test() {
 		basepoint_mul(&point_pk, big_sk, &group);
 		affpoint2char(pk, &point_pk);
 
+#ifdef LINUX_PERFORMANCE
 		gettimeofday(&start, NULL);
+#endif
 		for (k=0; k<1000; k++) {
 			sm2_sign(hash, random, sk, sign_r, sign_s, &group);
 		}
+#ifdef LINUX_PERFORMANCE
 		gettimeofday(&end, NULL);
 		d1 = end.tv_sec*1000.0 - start.tv_sec*1000.0 + (end.tv_usec - start.tv_usec)/1000.0;
 		fprintf(stdout,"--- total time is %f ms \n", d1);
 		fprintf(stdout,"--- one time is %f ms \n", d1/1000);
 
 		gettimeofday(&start, NULL);
+#endif
 		for (k=0; k<1000; k++) {
 			ret = sm2_verify(hash, pk, sign_r, sign_s, &group);
 			if (ret != 0) {
 				printf("verify error\n");
 			}
 		}
+#ifdef LINUX_PERFORMANCE
 		gettimeofday(&end, NULL);
 		d1 = end.tv_sec*1000.0 - start.tv_sec*1000.0 + (end.tv_usec - start.tv_usec)/1000.0;
 		fprintf(stdout,"--- total time is %f ms \n", d1);
 		fprintf(stdout,"--- one time is %f ms \n", d1/1000);
+#endif
 	}
 }
 
 void sm2_test() {
 	sm2_function_test();
+#ifdef PERFORMANCE
 	sm2_performance_test();
+#endif
 }
 
 int main() {
