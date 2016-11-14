@@ -1,6 +1,6 @@
 default: buxus_test.exe
 
-BITS=32
+BITS=64
 PERF=1
 DBG=0
 
@@ -41,7 +41,7 @@ buxus_test.o: buxus_test.c
 	${COMPILER} ${CFLAG} -o buxus_test.o -c buxus_test.c
 
 buxus_test.exe: bigint.o point.o sm2_algo.o buxus_test.o
-	${COMPILER} ${CFLAG} -o buxus_test.exe bigint.o point.o sm2_algo.o buxus_test.o
+	${COMPILER} ${CFLAG} -lpthread -o buxus_test.exe bigint.o point.o sm2_algo.o buxus_test.o
 
 run: buxus_test.exe
 	./buxus_test.exe
@@ -49,6 +49,9 @@ run: buxus_test.exe
 perf: ./buxus_test.exe
 	perf record -g -e cycles ./buxus_test.exe
 	perf report
+
+simple_perf: ./buxus_test.exe
+	perf stat ./buxus_test.exe
 
 clean:
 	rm -rf *.o *.exe perf*
