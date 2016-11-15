@@ -23,7 +23,7 @@ else
 endif
 
 ifeq (${PERF},1)
-  CFLAG += -DLINUX_PERFORMANCE
+  #CFLAG += -DLINUX_PERFORMANCE
 endif
 
 $(patsubst %.c,%.o,$(wildcard *.c)): buxus_type.h
@@ -41,7 +41,7 @@ buxus_test.o: buxus_test.c
 	${COMPILER} ${CFLAG} -o buxus_test.o -c buxus_test.c
 
 buxus_test.exe: bigint.o point.o sm2_algo.o buxus_test.o
-	${COMPILER} ${CFLAG} -lpthread -o buxus_test.exe bigint.o point.o sm2_algo.o buxus_test.o
+	${COMPILER} ${CFLAG} -o buxus_test.exe bigint.o point.o sm2_algo.o buxus_test.o
 
 run: buxus_test.exe
 	./buxus_test.exe
