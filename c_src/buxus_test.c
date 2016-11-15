@@ -1,12 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#ifdef LINUX_PERFORMANCE
-#define PERFORMANCE
-#include <sys/time.h>
-#include <pthread.h>
+#include <windows.h>
 #include <string.h>
-#endif
 #include "buxus_type.h"
 #include "bigint.h"
 #include "point.h"
@@ -310,16 +306,19 @@ void* sm2_1000times_test(void* arg) {
 }
 
 void sm2_multi_thread_test(int n) {
-	pthread_t* tid;
-	int err;
-	void* tret;
+	HANDLE* handle;
 	int i;
-	struct timeval start;
-	struct timeval end;
-	double d1;
+    //用QueryPerformanceCounter()来计时  微秒
+    LARGE_INTEGER  large_interger;
+    double dff;
+    __int64  c1, c2;
 
-	tid = malloc(n*sizeof(pthread_t*));
-	gettimeofday(&start, NULL);
+	handle = malloc(n*sizeof(pthread_t*));
+
+    QueryPerformanceFrequency(&large_interger);
+    dff = large_interger.QuadPart;
+    QueryPerformanceCounter(&large_interger);
+    c1 = large_interger.QuadPart;
 
 	for (i=0; i<n; i++) {
 		err = pthread_create(tid+i, NULL, sm2_1000times_test, NULL);
@@ -335,6 +334,16 @@ void sm2_multi_thread_test(int n) {
 			exit(-1);
 		}
 	}
+
+    QueryPerformanceCounter(&large_interger);
+    c2 = large_interger.QuadPart;
+    printf("本机高精度计时器频率%lf\n", dff);
+    printf("第一次计时器值%I64d 第二次计时器值%I64d 计时器差%I64d\n", c1, c2, c2 - c1);
+    printf("计时%lf us\n", (c2 - c1) * 1000000 / dff);
+
+	fprintf(stdout,"--- Test of %d thread \n", n);
+	fprintf(stdout,"--- total time is %f us \n", d1);
+	fprintf(stdout,"--- one (sign+verify) time is %f us \n", d1/(n*1000));
 
 	gettimeofday(&end, NULL);
 
