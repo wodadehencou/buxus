@@ -340,9 +340,10 @@ void sm2_multi_thread_test(int n) {
 
 	d1 = end.tv_sec*1000000.0 - start.tv_sec*1000000.0 + (end.tv_usec - start.tv_usec);
 
-	fprintf(stdout,"### Test of %d thread \n", n);
+	fprintf(stdout,"--- Test of %d thread \n", n);
 	fprintf(stdout,"--- total time is %f us \n", d1);
 	fprintf(stdout,"--- one (sign+verify) time is %f us \n", d1/(n*1000));
+	fprintf(stdout,"%d,%f,%f,\n", n, 0.45*(d1/(n*1000)), 0.55*(d1/(n*1000)));
 
 	return;
 }
@@ -352,7 +353,7 @@ void sm2_test() {
 #ifdef PERFORMANCE
 	sm2_performance_test();
 	int i;
-	for (i=1; i<80; i++) {
+	for (i=1; i<60; i++) {
 		sm2_multi_thread_test(i);
 	}
 #endif
